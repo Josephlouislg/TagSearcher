@@ -1,0 +1,34 @@
+version: "3.6"
+
+services:
+
+  chat_frontend:
+    image: chat_frontend
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.chat_frontend
+    volumes:
+      - ./:/app/
+    ports:
+      - "2000:2000"
+    networks:
+      main:
+        aliases:
+          - chat_frontend
+    command: [
+      "python3.6",
+      "-m",
+      "tag_searcher",
+      "--port",
+      "2000",
+      "--host",
+      "0.0.0.0"
+    ]
+
+
+networks:
+  main:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.19.0.0/16
