@@ -2,11 +2,13 @@ version: "3.6"
 
 services:
 
-  chat_frontend:
-    image: chat_frontend
+  tag_searcher:
+    image: tag_searcher
     build:
       context: .
-      dockerfile: config/docker/Dockerfile.chat_frontend
+      dockerfile: config/docker/Dockerfile.tag_searcher
+    environment:
+     - PYTHONUNBUFFERED=0
     volumes:
       - ./:/app/
     ports:
@@ -14,7 +16,7 @@ services:
     networks:
       main:
         aliases:
-          - chat_frontend
+          - tag_searcher
     command: [
       "python3.6",
       "-m",

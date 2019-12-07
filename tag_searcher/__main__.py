@@ -1,9 +1,9 @@
 import argparse
+import csv
 
 import logging.handlers
 
 import asyncio
-
 import uvloop
 from aiohttp import web
 
@@ -23,7 +23,10 @@ def parse_args():
 
 async def create_app(args):
     app = web.Application()
-    app['tag_tree_service'] = TagTreeService(tag_file_path=args.tag_file_path)
+    with open(args.tag_file_path) as file:
+        csv_reader = csv.reader(file, delimiter='\n')
+        tags = (title[0] for title in csv_reader)
+        app['tag_tree_service'] = TagTreeService(tags=tags)
     app.router.add_route(
         'POST', '/text', request_handler
     )

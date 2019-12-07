@@ -1,4 +1,3 @@
-import csv
 import logging
 
 
@@ -6,12 +5,9 @@ log = logging.getLogger(__name__)
 
 
 class TagTreeService(object):
-    def __init__(self, tag_file_path):
+    def __init__(self, tags):
         self.tags_tree = {}
-        with open(tag_file_path) as file:
-            csv_reader = csv.reader(file, delimiter='\n')
-            tags = (title[0] for title in csv_reader)
-            self._load_tree(tags)
+        self._load_tree(tags)
 
     def _load_tree(self, tags):
         for tag in tags:
@@ -27,4 +23,40 @@ class TagTreeService(object):
                 current_subtree = current_subtree[tag_word]['childs']
 
     def get_tags_by_text(self, text: str)-> list:
-        return [self.tags_tree['toyota']]
+        tags = []
+        max_text_words_beetwen_tag_words = 2
+        text_words = [word.strip() for word in text.split(' ') if word.strip()]
+        for index, word in enumerate(text_words, start=0):
+            word_tags = []
+            current_text_word = word
+            current_word_index = index
+            current_subtree = self.tags_tree
+
+            while current_subtree and current_text_word:
+                tag = current_subtree.get(current_text_word, None)
+                if not tag:
+                    break
+
+                word_tags.append(current_text_word)
+                if tag['is_leaf']:
+                    tags.append(' '.join(word_tags))
+                current_subtree = tag['childs']
+                current_text_word = None
+
+                possible_next_tags_words = (
+                    text_words[current_word_index + i]
+                    for i in range(1, max_text_words_beetwen_tag_words + 1)
+                    if len(text_words) >= i + current_word_index + 1
+                )
+                for possible_tag_index, tag_word in enumerate(possible_next_tags_words):
+                    tag = current_subtree.get(tag_word, None)
+                    if tag:
+                        word_tags.append(tag_word)
+                        if tag['is_leaf']:
+                            tags.append(' '.join(word_tags))
+                        current_text_word = tag_word
+                        current_word_index = current_word_index + possible_tag_index + 1
+                        current_subtree = tag['childs']
+                        break
+        return tags
+
