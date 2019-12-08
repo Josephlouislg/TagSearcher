@@ -1,7 +1,6 @@
 version: "3.6"
 
 services:
-
   tag_searcher:
     image: tag_searcher
     build:
@@ -27,6 +26,23 @@ services:
       "0.0.0.0"
     ]
 
+  pytest:
+    image: tag_searcher
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.tag_searcher
+    environment:
+     - PYTHONUNBUFFERED=0
+    volumes:
+      - ./:/app/
+    networks:
+      main:
+        aliases:
+          - pytest
+    command: [
+      "pytest",
+      "tests"
+    ]
 
 networks:
   main:
